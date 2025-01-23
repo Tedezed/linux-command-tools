@@ -1,4 +1,4 @@
-# DevOps Command Tools
+# Linux Command Tools
 
 - Install: `sudo cp */* /usr/bin/`
 - Uninstall: `bash devops_command.sh --uninstall`
