@@ -1,7 +1,6 @@
 # Linux Command Tools
 
-- Install: `sudo cp */* /usr/bin/`
-- Uninstall: `bash devops_command.sh --uninstall`
+- Install: `sudo cp -r */* /usr/bin/`
 
 ## Kubernetes
 

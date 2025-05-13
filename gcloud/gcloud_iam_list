@@ -1,0 +1,27 @@
+#!/bin/bash
+# By Tedezed
+# Gcloud find the bucket project
+
+PROJECT_NAME=$1
+
+echo "IAM List for Project: $PROJECT_NAME
+"
+echo "Users:"
+for user in $(gcloud projects get-iam-policy $PROJECT_NAME --format="json(bindings)" | jq -r '.bindings[].members[]' |   grep '^user:' |   sort -u |   sed 's/^user://')
+do
+    echo "  - $user"
+done
+
+echo "
+Groups:"
+for group in $(gcloud projects get-iam-policy $PROJECT_NAME --format="json(bindings)" | jq -r '.bindings[].members[]' |   grep '^group:' |   sort -u |   sed 's/^group://')
+do
+    echo "  - $group"
+done
+
+echo "
+ServiceAccount:"
+for serviceAccount in $(gcloud projects get-iam-policy $PROJECT_NAME --format="json(bindings)" | jq -r '.bindings[].members[]' |   grep '^serviceAccount:' |   sort -u |   sed 's/^serviceAccount://')
+do
+    echo "  - $serviceAccount"
+done
