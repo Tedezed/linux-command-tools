@@ -10,6 +10,20 @@ function get_kube_clusters () {
 			echo "[$cont] $cluster";
 		fi
 		if [ "$1" == "connect_to_clusters" ] && [ "$2" == "$cont" ]; then
+			cluster_type=$(echo "${cluster}" | cut -d '_' -f1)
+			cluster_project=$(echo "${cluster}" | cut -d '_' -f2)
+			cluster_location=$(echo "${cluster}" | cut -d '_' -f3)
+			cluster_location_type=$(echo "${cluster_location}" | grep -o "-" | wc -l)
+			cluster_shot_name=$(echo "${cluster}" | cut -d '_' -f4)
+			if [ "${cluster_type}" == "gke" ]; then
+				if [ "${cluster_location_type}" == "2" ]; then
+					cluster_location_command="--zone ${cluster_location}"
+				else
+					cluster_location_command="--region ${cluster_location}"
+				fi
+				echo "> gcloud container clusters get-credentials ${cluster_shot_name} ${cluster_location_command} --project ${cluster_project}"
+				gcloud container clusters get-credentials ${cluster_shot_name} ${cluster_location_command} --project ${cluster_project}
+			fi
 			kubectl config use-context $cluster
 			cluster_found=1
 		fi
