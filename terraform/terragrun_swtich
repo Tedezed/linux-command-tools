@@ -1,0 +1,64 @@
+#!/bin/bash
+# By Tedezed
+# Terragrunt Switch
+
+set -euo pipefail
+
+echo "Terragrunt version switch"
+OS="linux"
+ARCH="amd64"
+BINARY_NAME="terragrunt_${OS}_${ARCH}"
+
+fruits=("v0.88.1" "v0.66.0")
+
+# Show menu
+echo "Select a version:"
+for i in "${!fruits[@]}"; do
+    echo "  $((i+1))) ${fruits[$i]}"
+done
+
+# Read user choice
+read -p "Enter number [1-${#fruits[@]}]: " choice
+
+# Check with if
+if [[ "$choice" -ge 1 && "$choice" -le ${#fruits[@]} ]]; then
+    index=$((choice-1))
+    echo "[INFO] You selected: ${fruits[$index]}"
+else
+    echo "[ERROR] Invalid choice"
+fi
+
+VERSION=${fruits[$index]}
+
+# Download the binary
+echo "[INFO] Get Terragrunt binary..."
+curl -sL "https://github.com/gruntwork-io/terragrunt/releases/download/$VERSION/$BINARY_NAME" -o "$BINARY_NAME"
+
+# Generate the checksum
+CHECKSUM="$(sha256sum "$BINARY_NAME" | awk '{print $1}')"
+
+# Download the checksum file
+curl -sL "https://github.com/gruntwork-io/terragrunt/releases/download/$VERSION/SHA256SUMS" -o SHA256SUMS
+
+# Grab the expected checksum
+EXPECTED_CHECKSUM="$(grep "$BINARY_NAME" <SHA256SUMS | awk '{print $1}')"
+
+# Compare the checksums
+if [ "$CHECKSUM" == "$EXPECTED_CHECKSUM" ]; then
+ echo "[INFO] Checksums match!"
+else
+ echo "[ERROR] Checksums do not match!"
+fi
+
+echo "[INFO] Install new version of Terragunt"
+sudo mv $BINARY_NAME /usr/bin/terragrunt
+sudo chmod +x /usr/bin/terragrunt
+
+# Check if it succeeded
+if [ $? -eq 0 ]; then
+    echo "[INFO] Installation completed successfully!"
+else
+    echo "[ERROR] Installation completed with an error"
+fi
+
+echo "Terragrunt version: ${VERSION}"
