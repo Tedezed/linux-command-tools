@@ -9,26 +9,26 @@ OS="linux"
 ARCH="amd64"
 BINARY_NAME="terragrunt_${OS}_${ARCH}"
 
-fruits=("v0.88.1" "v0.66.0")
+versions=("v0.88.1" "v0.66.0")
 
 # Show menu
 echo "Select a version:"
-for i in "${!fruits[@]}"; do
-    echo "  $((i+1))) ${fruits[$i]}"
+for i in "${!versions[@]}"; do
+    echo "  $((i+1))) ${versions[$i]}"
 done
 
 # Read user choice
-read -p "Enter number [1-${#fruits[@]}]: " choice
+read -p "Enter number [1-${#versions[@]}]: " choice
 
 # Check with if
-if [[ "$choice" -ge 1 && "$choice" -le ${#fruits[@]} ]]; then
+if [[ "$choice" -ge 1 && "$choice" -le ${#versions[@]} ]]; then
     index=$((choice-1))
-    echo "[INFO] You selected: ${fruits[$index]}"
+    echo "[INFO] You selected: ${versions[$index]}"
 else
     echo "[ERROR] Invalid choice"
 fi
 
-VERSION=${fruits[$index]}
+VERSION=${versions[$index]}
 
 # Download the binary
 echo "[INFO] Get Terragrunt binary..."
