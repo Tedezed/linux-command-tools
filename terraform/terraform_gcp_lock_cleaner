@@ -1,0 +1,56 @@
+#!/bin/bash
+# Secure Terraform GCP lock cleaner
+# By Tedezed
+
+set -e
+
+ask_continue() {
+    read -p "Do you want to continue? (yes/no) " response
+    if [[ "$response" == "yes" ]]; then
+        echo "Continuing..."
+    else
+        echo "Exiting..."
+        exit 0
+    fi
+}
+
+echo "---------------------------------------"
+echo "🔐 Secure Terraform GCP lock cleaner 🔐"
+echo "---------------------------------------"
+echo ""
+
+for arg in "$@"; do
+  case $arg in
+    --state_bucket=*)
+      state_bucket="${arg#*=}"
+      ;;
+  esac
+done
+
+if [ -z "$state_bucket" ]; then
+    echo "[ERROR] state_bucket is not set..."
+    echo "  Example usage: bash script.sh --state_bucket=(your_remote_bucket_name)"
+    exit 1
+fi
+
+echo "[INFO] ⚠️ Please disable Terraform CI runners before execute the script! ⚠️"
+ask_continue
+
+echo "[INFO] 💾 Creating a backup... 💾"
+backup_directory="${state_bucket}-backup"
+if [ -d "$backup_directory" ]; then
+    echo "[ERROR] Directory ${backup_directory} exists..."
+    exit 1
+fi
+
+mkdir -p ${state_bucket}-backup
+gsutil -m rsync -r gs://${state_bucket} ${backup_directory}
+
+echo "[INFO] 🔥 All tflocks in the bucket will be deleted 🔥"
+ask_continue
+
+for lock in $(gsutil ls -r gs://${state_bucket} | grep '\.tflock$')
+do
+	echo "[INFO] Remove lock file ${lock}"
+	gsutil rm ${lock}
+done
